@@ -8,7 +8,7 @@ export default auth((req) => {
   const path = nextUrl.pathname;
 
   // Public routes - always accessible
-  const publicRoutes = ["/login", "/register", "/forgot-password"];
+  const publicRoutes = ["/login", "/register", "/forgot-password", "/"];
   if (publicRoutes.includes(path)) {
     return NextResponse.next();
   }

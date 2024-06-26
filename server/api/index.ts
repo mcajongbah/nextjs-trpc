@@ -1,4 +1,4 @@
-import { createTRPCRouter } from "../trpc";
+import { createCallerFactory, createTRPCRouter } from "../trpc";
 import { authRouter } from "./routers/authRouter";
 
 export const appRouter = createTRPCRouter({
@@ -6,3 +6,5 @@ export const appRouter = createTRPCRouter({
 });
 
 export type AppRouter = typeof appRouter;
+
+export const createCaller = createCallerFactory(appRouter);
