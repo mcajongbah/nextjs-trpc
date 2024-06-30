@@ -3,6 +3,7 @@ import { ZodError } from "zod";
 import { auth } from "@/auth";
 import prisma from "@/lib/prisma";
 import superjson from "superjson";
+import { rateLimiter } from "./middlewares/rate-limiter";
 
 export const createTRPCContext = async (opts: { headers: Headers }) => {
   const session = await auth();
@@ -30,7 +31,12 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
 export const createCallerFactory = t.createCallerFactory;
 
 export const createTRPCRouter = t.router;
-export const publicProcedure = t.procedure;
+export const publicProcedure = t.procedure.use(async ({ ctx, next }) => {
+  await rateLimiter({
+    identifier: ctx.headers.get("x-forwarded-for") || "unknown",
+  });
+  return next();
+});
 
 const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   if (!ctx.session || !ctx.session.user) {
@@ -44,4 +50,11 @@ const enforceUserIsAuthed = t.middleware(({ ctx, next }) => {
   });
 });
 
-export const protectedProcedure = t.procedure.use(enforceUserIsAuthed);
+export const protectedProcedure = t.procedure
+  .use(enforceUserIsAuthed)
+  .use(async ({ ctx, next }) => {
+    await rateLimiter({
+      identifier: ctx.headers.get("x-forwarded-for") || "unknown",
+    });
+    return next();
+  });

@@ -3,7 +3,7 @@ import "server-only"
 import { headers } from "next/headers";
 import { cache } from "react";
 import { createTRPCContext } from "@/server/trpc";
-import { appRouter, createCaller } from "@/server/api";
+import { createCaller } from "@/server/api";
 
 
 const createContext = cache(() => {
